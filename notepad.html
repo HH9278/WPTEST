@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:system-ui,sans-serif;width:100%;max-width:none;margin:24px auto;padding:16px;background:#f8f9fa}
+.wrap{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:16px}
+.panel{background:#fff;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+button,input,textarea{font:inherit}
+button{border:none;border-radius:12px;padding:10px 14px;cursor:pointer;background:#111;color:#fff}
+input,textarea{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:12px;padding:10px}
+textarea{min-height:420px;resize:vertical}
+.note{padding:10px;border:1px solid #eee;border-radius:12px;margin-top:8px;cursor:pointer}
+.note.active{border-color:#111;background:#f1f3f5}
+.meta{font-size:12px;color:#666;margin-top:4px}
+.row{display:flex;gap:8px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class='wrap'>
+<div class='panel'>
+<div class='row'><button onclick='newNote()'>新規</button><button onclick='removeNote()'>削除</button></div>
+<input id='search' placeholder='検索...' oninput='renderList()'>
+<div id='list'></div>
+</div>
+<div class='panel'>
+<input id='title' placeholder='タイトル' oninput='saveCurrent()'>
+<div style='height:10px'></div>
+<textarea id='body' placeholder='ここにメモ...' oninput='saveCurrent()'></textarea>
+<div class='meta' id='status'>保存待機中</div>
+</div>
+</div>
+<script>
+let db,currentId=null;
+const req=indexedDB.open('LocalNotepadDB',1);
+req.onupgradeneeded=e=>{db=e.target.result;const s=db.createObjectStore('notes',{keyPath:'id',autoIncrement:true});s.createIndex('updatedAt','updatedAt');};
+req.onsuccess=e=>{db=e.target.result;renderList();};
+function tx(mode='readonly'){return db.transaction('notes',mode).objectStore('notes');}
+function newNote(){const note={title:'新しいメモ',body:'',updatedAt:Date.now()};const r=tx('readwrite').add(note);r.onsuccess=()=>{currentId=r.result;load(currentId);renderList();};}
+function saveCurrent(){if(!currentId)return;const note={id:currentId,title:title.value||'無題',body:body.value,updatedAt:Date.now()};tx('readwrite').put(note).onsuccess=()=>{status.textContent='保存しました';renderList();};}
+function load(id){currentId=id;tx().get(id).onsuccess=e=>{const n=e.target.result;if(!n)return;title.value=n.title;body.value=n.body;status.textContent='読込完了';renderList();};}
+function removeNote(){if(!currentId)return;tx('readwrite').delete(currentId).onsuccess=()=>{currentId=null;title.value='';body.value='';renderList();};}
+function renderList(){const q=search.value.toLowerCase();const r=tx().getAll();r.onsuccess=e=>{const arr=e.target.result.sort((a,b)=>b.updatedAt-a.updatedAt).filter(n=>n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q));list.innerHTML='';arr.forEach(n=>{const d=document.createElement('div');d.className='note'+(n.id===currentId?' active':'');d.innerHTML='<strong>'+escapeHtml(n.title)+'</strong><div class="meta">'+new Date(n.updatedAt).toLocaleString()+'</div>';d.onclick=()=>load(n.id);list.appendChild(d);});};}
+function escapeHtml(s){return s.replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+</script>
+</body>
+</html>
