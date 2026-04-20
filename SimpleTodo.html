@@ -83,13 +83,18 @@ function save(){
   render();
 }
 
-function getNextNo(){
-  if(!todos.length) return 1;
-  return Math.max(...todos.map(t => Number(t.no)||0)) + 1;
+/* 選択日付ごとの次番号取得 */
+function getNextNoByDate(date){
+  const list=todos.filter(t=>t.due===date);
+
+  if(!list.length) return 1;
+
+  return Math.max(...list.map(t => Number(t.no)||0)) + 1;
 }
 
 function setNextNo(){
-  document.getElementById('todo-no').value=getNextNo();
+  const due=document.getElementById('todo-due').value;
+  document.getElementById('todo-no').value=getNextNoByDate(due);
 }
 
 function addTodo(){
@@ -101,7 +106,7 @@ function addTodo(){
   const text=el.value.trim();
   if(!text) return;
 
-  const no=Number(noEl.value)||getNextNo();
+  const no=Number(noEl.value)||getNextNoByDate(due.value);
 
   todos.push({
     id:Date.now(),
@@ -213,6 +218,9 @@ function setDefaultDue(){
   const day=String(d.getDate()).padStart(2,'0');
   document.getElementById('todo-due').value=`${y}-${m}-${day}`;
 }
+
+/* 日付変更時にその日付の連番を自動設定 */
+document.getElementById('todo-due').addEventListener('change',setNextNo);
 
 document.getElementById('todo-input').addEventListener('keydown',e=>{
   if(e.key==='Enter') addTodo();
