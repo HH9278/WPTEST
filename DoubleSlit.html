@@ -1,0 +1,189 @@
+<div id="quantum-sim" style="max-width:900px;margin:auto;background:#0b0b0b;color:#fff;padding:18px;border-radius:18px;font-family:sans-serif;">
+  <h2 style="margin-top:0;">二重スリット観測シミュレーション</h2>
+
+  <div style="margin-bottom:14px;">
+    <label style="margin-right:18px;">
+      <input type="checkbox" id="observeMode">
+      観測する（粒子モード）
+    </label>
+
+    <button id="resetSim" style="padding:8px 16px;cursor:pointer;">リセット</button>
+  </div>
+
+  <canvas id="doubleCanvas" width="860" height="430"
+    style="width:100%;background:#000;border-radius:14px;display:block;">
+  </canvas>
+
+  <p style="color:#bbb;font-size:14px;">
+    観測ON：壁に点が1つずつ蓄積 / 観測OFF：波の干渉縞が現れます
+  </p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const root = document.getElementById("quantum-sim");
+  if (!root) return;
+
+  const canvas = document.getElementById("doubleCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const observe = document.getElementById("observeMode");
+  const resetBtn = document.getElementById("resetSim");
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  const sourceX = 60;
+  const slitX = W / 2;
+  const wallX = W - 70;
+
+  const slit1Y = H / 2 - 70;
+  const slit2Y = H / 2 + 70;
+
+  let hits = [];
+
+  function sinc(x){
+    if (x === 0) return 1;
+    return Math.sin(x) / x;
+  }
+
+  function intensity(y){
+    const dy = y - H/2;
+
+    const fringe = Math.pow(Math.cos(dy * 0.045), 2);
+    const envelope = Math.pow(sinc(dy * 0.02), 2);
+
+    return fringe * envelope;
+  }
+
+  function sampleY(){
+    for(let i=0;i<2500;i++){
+      let y = Math.random() * H;
+      if(Math.random() < intensity(y)){
+        return y;
+      }
+    }
+    return Math.random() * H;
+  }
+
+  function drawBase(){
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0,0,W,H);
+
+    // source
+    ctx.fillStyle = "#00ffff";
+    ctx.beginPath();
+    ctx.arc(sourceX,H/2,7,0,Math.PI*2);
+    ctx.fill();
+
+    // barrier
+    ctx.fillStyle = "#666";
+    ctx.fillRect(slitX-7,0,14,H);
+
+    // slits
+    ctx.clearRect(slitX-7, slit1Y-15, 14, 30);
+    ctx.clearRect(slitX-7, slit2Y-15, 14, 30);
+
+    // wall
+    ctx.fillStyle = "#333";
+    ctx.fillRect(wallX,0,8,H);
+  }
+
+  function drawWavePattern(){
+    for(let y=0;y<H;y++){
+      const I = intensity(y);
+      const g = Math.floor(255 * I);
+
+      ctx.fillStyle = "rgb(0," + g + ",255)";
+      ctx.fillRect(wallX+10,y,18,1);
+    }
+  }
+
+  function drawHits(){
+    ctx.fillStyle = "rgba(0,255,120,0.95)";
+    for(let i=0;i<hits.length;i++){
+      ctx.fillRect(wallX+12,hits[i],3,3);
+    }
+  }
+
+  function drawParticle(){
+
+    const targetY = sampleY();
+    const throughTop = Math.random() < 0.5;
+
+    const slitY = throughTop ? slit1Y : slit2Y;
+
+    let t = 0;
+
+    function anim(){
+
+      drawBase();
+      if(!observe.checked){
+        drawWavePattern();
+      }
+      drawHits();
+
+      t += 0.035;
+
+      let x,y;
+
+      if(t < 0.5){
+        const p = t / 0.5;
+        x = sourceX + (slitX-sourceX)*p;
+        y = H/2 + (slitY-H/2)*p;
+      }else{
+        const p = (t-0.5)/0.5;
+        x = slitX + (wallX-slitX)*p;
+        y = slitY + (targetY-slitY)*p;
+      }
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fill();
+
+      if(t < 1){
+        requestAnimationFrame(anim);
+      }else{
+        hits.push(targetY);
+      }
+    }
+
+    anim();
+  }
+
+  function loop(){
+
+    drawBase();
+
+    if(observe.checked){
+      drawHits();
+
+      if(hits.length < 600){
+        drawParticle();
+      }
+
+    }else{
+
+      drawWavePattern();
+
+      if(hits.length < 600){
+        hits.push(sampleY());
+      }
+
+      drawHits();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  resetBtn.addEventListener("click", function(){
+    hits = [];
+  });
+
+  loop();
+
+});
+</script>
