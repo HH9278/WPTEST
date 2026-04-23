@@ -1,234 +1,354 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div id="todo-wrap">
+  <h2>TODOリスト</h2>
+
+  <div class="row">
+    <input id="todo-no" type="number" placeholder="No">
+    <input id="todo-input" type="text" placeholder="TODO">
+  </div>
+
+  <div class="row" style="margin-top:8px;">
+    <input id="todo-cat" type="text" placeholder="CAT" list="cat-list">
+    <datalist id="cat-list"></datalist>
+    <input id="todo-due" type="date">
+    <button type="button" id="todo-add-btn">ADD</button>
+  </div>
+
+  <ul id="todo-list"></ul>
+</div>
+
 <style>
-body{background:#f7f7f7;margin:0;padding:20px}
-#todo-wrap{max-width:820px;margin:20px auto;padding:16px;border:1px solid #ddd;border-radius:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Courier New',monospace;background:#fff}
+#todo-wrap{
+  max-width:820px;
+  margin:20px auto;
+  padding:16px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Courier New',monospace;
+  background:#fff;
+  box-sizing:border-box;
+}
 #todo-wrap h2{margin:0 0 12px;font-size:24px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-input[type=text],input[type=date],input[type=number]{padding:10px;border:1px solid #ccc;border-radius:8px}
-#todo-no{width:90px}
-#todo-input{flex:1;min-width:220px}
-#todo-cat{width:180px}
-button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;background:#222;color:#fff}
-#todo-list{list-style:none;padding:0;margin:14px 0 0}
-#todo-list li.day{border:0;padding:10px 0 4px;font-weight:bold}
-#todo-list li.item{
-display:grid;
-grid-template-columns:28px 70px 1fr 140px 110px;
-gap:10px;
-align-items:center;
-padding:10px 0;
-border-bottom:1px solid #eee
+#todo-wrap .row{display:flex;gap:8px;flex-wrap:wrap}
+#todo-wrap input[type=text],
+#todo-wrap input[type=date],
+#todo-wrap input[type=number]{
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  box-sizing:border-box;
 }
-#todo-list li.item span.task{overflow-wrap:anywhere}
-#todo-list li.item span.cat{color:#666;font-size:14px}
-#todo-list li.item span.no{font-weight:bold;color:#444}
-#todo-list li.item.done span.task,
-#todo-list li.item.done span.cat,
-#todo-list li.item.done span.no{text-decoration:line-through;color:#888}
-.actions{display:flex;gap:6px}
-.del{background:#f3f3f3;color:#333}
-.head{
-display:grid;
-grid-template-columns:28px 70px 1fr 140px 110px;
-gap:10px;
-padding:8px 0;
-border-bottom:2px solid #ddd;
-font-weight:bold;
-color:#555
+#todo-wrap #todo-no{width:90px}
+#todo-wrap #todo-input{flex:1;min-width:220px}
+#todo-wrap #todo-cat{width:180px}
+#todo-wrap button{
+  padding:10px 14px;
+  border:0;
+  border-radius:8px;
+  cursor:pointer;
+  background:#222;
+  color:#fff;
 }
-.star-btn{
-width:28px;height:28px;padding:0;
-display:flex;align-items:center;justify-content:center;
-background:#f3f3f3;color:#333;
+#todo-wrap #todo-list{list-style:none;padding:0;margin:14px 0 0}
+#todo-wrap #todo-list li.day{
+  border:0;
+  padding:10px 0 4px;
+  font-weight:bold;
+}
+#todo-wrap #todo-list li.item{
+  display:grid;
+  grid-template-columns:28px 70px 1fr 140px 110px;
+  gap:10px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+#todo-wrap #todo-list li.item span.task{overflow-wrap:anywhere}
+#todo-wrap #todo-list li.item span.cat{color:#666;font-size:14px}
+#todo-wrap #todo-list li.item span.no{font-weight:bold;color:#444}
+#todo-wrap #todo-list li.item.done span.task,
+#todo-wrap #todo-list li.item.done span.cat,
+#todo-wrap #todo-list li.item.done span.no{
+  text-decoration:line-through;
+  color:#888;
+}
+#todo-wrap .actions{display:flex;gap:6px}
+#todo-wrap .del{background:#f3f3f3;color:#333}
+#todo-wrap .head{
+  display:grid;
+  grid-template-columns:28px 70px 1fr 140px 110px;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:2px solid #ddd;
+  font-weight:bold;
+  color:#555;
+}
+#todo-wrap .star-btn{
+  width:28px;
+  height:28px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f3f3f3;
+  color:#333;
 }
 @media (max-width:640px){
-#todo-list li.item,.head{grid-template-columns:28px 70px 1fr}
-.head div:nth-child(4),.head div:nth-child(5),
-#todo-list li.item span.cat,
-#todo-list li.item .actions{grid-column:3}
+  #todo-wrap #todo-list li.item,
+  #todo-wrap .head{
+    grid-template-columns:28px 70px 1fr;
+  }
+  #todo-wrap .head div:nth-child(4),
+  #todo-wrap .head div:nth-child(5),
+  #todo-wrap #todo-list li.item span.cat,
+  #todo-wrap #todo-list li.item .actions{
+    grid-column:3;
+  }
 }
 </style>
-</head>
-<body>
-<div id="todo-wrap">
-<h2>TODOリスト</h2>
-
-<div class="row">
-<input id="todo-no" type="number" placeholder="No">
-<input id="todo-input" type="text" placeholder="TODO">
-</div>
-
-<div class="row" style="margin-top:8px;">
-<input id="todo-cat" type="text" placeholder="CAT" list="cat-list">
-<datalist id="cat-list"></datalist>
-<input id="todo-due" type="date">
-<button onclick="addTodo()">ADD</button>
-</div>
-
-<ul id="todo-list"></ul>
-</div>
 
 <script>
-const KEY='simple_wp_todos';
-let todos=JSON.parse(localStorage.getItem(KEY)||'[]');
+(function(){
+  const KEY='simple_wp_todos';
 
-function save(){
-  localStorage.setItem(KEY,JSON.stringify(todos));
-  setDefaultDue();
-  setNextNo();
-  render();
-}
+  function loadTodos(){
+    try{
+      return JSON.parse(localStorage.getItem(KEY) || '[]');
+    }catch(e){
+      return [];
+    }
+  }
 
-/* 選択日付ごとの次番号取得 */
-function getNextNoByDate(date){
-  const list=todos.filter(t=>t.due===date);
+  let todos = loadTodos();
 
-  if(!list.length) return 1;
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(todos));
+    render();
+    setNextNo();
+  }
 
-  return Math.max(...list.map(t => Number(t.no)||0)) + 1;
-}
+  function getEl(id){
+    return document.getElementById(id);
+  }
 
-function setNextNo(){
-  const due=document.getElementById('todo-due').value;
-  document.getElementById('todo-no').value=getNextNoByDate(due);
-}
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
 
-function addTodo(){
-  const noEl=document.getElementById('todo-no');
-  const el=document.getElementById('todo-input');
-  const cat=document.getElementById('todo-cat');
-  const due=document.getElementById('todo-due');
+  function getDefaultDue(){
+    const d=new Date();
+    d.setDate(d.getDate()+1);
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
+  }
 
-  const text=el.value.trim();
-  if(!text) return;
+  function setDefaultDue(){
+    const dueEl=getEl('todo-due');
+    if(!dueEl) return;
+    if(!dueEl.value) dueEl.value=getDefaultDue();
+  }
 
-  const no=Number(noEl.value)||getNextNoByDate(due.value);
+  function getNextNoByDate(date){
+    const list=todos.filter(t=>t.due===date);
+    if(!list.length) return 1;
+    return Math.max(...list.map(t => Number(t.no) || 0)) + 1;
+  }
 
-  todos.push({
-    id:Date.now(),
-    no:no,
-    text:text,
-    category:cat.value.trim(),
-    due:due.value,
-    done:false,
-    star:false
-  });
+  function setNextNo(){
+    const dueEl=getEl('todo-due');
+    const noEl=getEl('todo-no');
+    if(!dueEl || !noEl) return;
+    noEl.value=getNextNoByDate(dueEl.value);
+  }
 
-  const keepDue=due.value;
-  el.value='';
-  cat.value='';
-  due.value=keepDue;
+  function addTodo(){
+    const noEl=getEl('todo-no');
+    const inputEl=getEl('todo-input');
+    const catEl=getEl('todo-cat');
+    const dueEl=getEl('todo-due');
 
-  save();
-}
+    if(!noEl || !inputEl || !catEl || !dueEl) return;
 
-function toggleTodo(id){
-  todos=todos.map(t=>t.id===id?{...t,done:!t.done}:t);
-  save();
-}
+    const text=inputEl.value.trim();
+    if(!text) return;
 
-function delTodo(id){
-  const t=todos.find(x=>x.id===id);
-  if(t && t.star) return;
-  todos=todos.filter(t=>t.id!==id);
-  save();
-}
+    const no=Number(noEl.value) || getNextNoByDate(dueEl.value);
 
-function toggleStar(id){
-  todos=todos.map(t=>t.id===id?{...t,star:!t.star}:t);
-  save();
-}
+    todos.push({
+      id: Date.now() + Math.floor(Math.random()*1000),
+      no: no,
+      text: text,
+      category: catEl.value.trim(),
+      due: dueEl.value || getDefaultDue(),
+      done: false,
+      star: false
+    });
 
-function editTodo(id){
-  const t=todos.find(x=>x.id===id);
-  if(!t) return;
+    inputEl.value='';
+    catEl.value='';
 
-  const v=prompt('TODOをEDT',t.text);
-  if(v===null) return;
+    save();
+  }
 
-  const nv=v.trim();
-  if(!nv) return;
+  function toggleTodo(id){
+    todos=todos.map(t=>t.id===id ? {...t, done:!t.done} : t);
+    save();
+  }
 
-  todos=todos.map(x=>x.id===id?{...x,text:nv}:x);
-  save();
-}
+  function delTodo(id){
+    const t=todos.find(x=>x.id===id);
+    if(t && t.star) return;
+    todos=todos.filter(t=>t.id!==id);
+    save();
+  }
 
-function render(){
-  const cats=[...new Set(todos.map(t=>t.category).filter(Boolean))];
-  document.getElementById('cat-list').innerHTML=
-    cats.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">`).join('');
+  function toggleStar(id){
+    todos=todos.map(t=>t.id===id ? {...t, star:!t.star} : t);
+    save();
+  }
 
-  todos.sort((a,b)=>{
-    const da=a.due || '9999-12-31';
-    const db=b.due || '9999-12-31';
+  function editTodo(id){
+    const t=todos.find(x=>x.id===id);
+    if(!t) return;
 
-    if(da!==db) return da.localeCompare(db);
-    if((a.no||0)!==(b.no||0)) return (a.no||0)-(b.no||0);
-    if(a.star!==b.star) return b.star-a.star;
-    if(a.done!==b.done) return a.done-b.done;
-    return a.text.localeCompare(b.text,'ja');
-  });
+    const v=window.prompt('TODOをEDT', t.text);
+    if(v===null) return;
 
-  const list=document.getElementById('todo-list');
-  const groups={};
+    const nv=v.trim();
+    if(!nv) return;
 
-  todos.forEach(t=>{
-    const key=t.due || '日付なし';
-    (groups[key]||(groups[key]=[])).push(t);
-  });
+    todos=todos.map(x=>x.id===id ? {...x, text:nv} : x);
+    save();
+  }
 
-  list.innerHTML=Object.keys(groups).map(day =>
-    `<li class="day">${day}</li>
-     <li class="head">
-       <div>★</div>
-       <div>No</div>
-       <div>TODO</div>
-       <div>CAT</div>
-       <div>OPERATION</div>
-     </li>` +
-    groups[day].map(t =>
-      `<li class="item ${t.done?'done':''}">
-        <button class="star-btn" onclick="toggleStar(${t.id})">${t.star?'★':'☆'}</button>
-        <span class="no">${t.no||''}</span>
-        <span class="task">
-          <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${t.id})">
-          ${t.text.replace(/</g,'&lt;')}
-        </span>
-        <span class="cat">${t.category?t.category:'-'}</span>
-        <div class="actions">
-          <button class="del" onclick="editTodo(${t.id})">EDT</button>
-          <button class="del"
-            ${t.star?'disabled style="opacity:.45;cursor:not-allowed"':''}
-            onclick="delTodo(${t.id})">DEL</button>
-        </div>
-      </li>`
-    ).join('')
-  ).join('');
-}
+  function render(){
+    const listEl=getEl('todo-list');
+    const catListEl=getEl('cat-list');
+    if(!listEl || !catListEl) return;
 
-function setDefaultDue(){
-  const d=new Date();
-  d.setDate(d.getDate()+1);
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,'0');
-  const day=String(d.getDate()).padStart(2,'0');
-  document.getElementById('todo-due').value=`${y}-${m}-${day}`;
-}
+    const cats=[...new Set(todos.map(t=>t.category).filter(Boolean))];
+    catListEl.innerHTML=cats.map(c=>`<option value="${escapeHtml(c)}">`).join('');
 
-/* 日付変更時にその日付の連番を自動設定 */
-document.getElementById('todo-due').addEventListener('change',setNextNo);
+    const groups={};
 
-document.getElementById('todo-input').addEventListener('keydown',e=>{
-  if(e.key==='Enter') addTodo();
-});
+    todos.forEach(t=>{
+      const key=t.due || '日付なし';
+      (groups[key]||(groups[key]=[])).push(t);
+    });
 
-render();
-setDefaultDue();
-setNextNo();
+    const dayKeys=Object.keys(groups).sort((a,b)=>{
+      const aAllDone=groups[a].every(t=>t.done);
+      const bAllDone=groups[b].every(t=>t.done);
+
+      if(aAllDone!==bAllDone) return aAllDone-bAllDone;
+      return a.localeCompare(b);
+    });
+
+    dayKeys.forEach(day=>{
+      groups[day].sort((a,b)=>{
+        if(a.done!==b.done) return a.done-b.done;
+
+        if(a.done && b.done){
+          return a.text.localeCompare(b.text,'ja');
+        }
+
+        if((a.no||0)!==(b.no||0)) return (a.no||0)-(b.no||0);
+        if(a.star!==b.star) return b.star-a.star;
+        return a.text.localeCompare(b.text,'ja');
+      });
+    });
+
+    listEl.innerHTML=dayKeys.map(day =>
+      `<li class="day">${escapeHtml(day)}</li>
+       <li class="head">
+         <div>★</div>
+         <div>No</div>
+         <div>TODO</div>
+         <div>CAT</div>
+         <div>OPERATION</div>
+       </li>` +
+      groups[day].map(t =>
+        `<li class="item ${t.done ? 'done' : ''}">
+          <button type="button" class="star-btn" data-action="star" data-id="${t.id}">${t.star ? '★' : '☆'}</button>
+          <span class="no">${escapeHtml(t.no || '')}</span>
+          <span class="task">
+            <input type="checkbox" data-action="toggle" data-id="${t.id}" ${t.done ? 'checked' : ''}>
+            ${escapeHtml(t.text)}
+          </span>
+          <span class="cat">${t.category ? escapeHtml(t.category) : '-'}</span>
+          <div class="actions">
+            <button type="button" class="del" data-action="edit" data-id="${t.id}">EDT</button>
+            <button type="button" class="del" data-action="delete" data-id="${t.id}" ${t.star ? 'disabled style="opacity:.45;cursor:not-allowed"' : ''}>DEL</button>
+          </div>
+        </li>`
+      ).join('')
+    ).join('');
+  }
+
+  function bindEvents(){
+    const dueEl=getEl('todo-due');
+    const inputEl=getEl('todo-input');
+    const addBtn=getEl('todo-add-btn');
+    const listEl=getEl('todo-list');
+
+    if(dueEl){
+      dueEl.addEventListener('change', setNextNo);
+    }
+
+    if(inputEl){
+      inputEl.addEventListener('keydown', function(e){
+        if(e.key==='Enter') addTodo();
+      });
+    }
+
+    if(addBtn){
+      addBtn.addEventListener('click', addTodo);
+    }
+
+    if(listEl){
+      listEl.addEventListener('click', function(e){
+        const btn=e.target.closest('[data-action]');
+        if(!btn) return;
+
+        const action=btn.getAttribute('data-action');
+        const id=Number(btn.getAttribute('data-id'));
+        if(!id) return;
+
+        if(action==='star') toggleStar(id);
+        if(action==='edit') editTodo(id);
+        if(action==='delete') delTodo(id);
+      });
+
+      listEl.addEventListener('change', function(e){
+        const el=e.target.closest('[data-action="toggle"]');
+        if(!el) return;
+
+        const id=Number(el.getAttribute('data-id'));
+        if(!id) return;
+
+        toggleTodo(id);
+      });
+    }
+  }
+
+  function init(){
+    if(!getEl('todo-wrap')) return;
+    setDefaultDue();
+    bindEvents();
+    render();
+    setNextNo();
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  }else{
+    init();
+  }
+})();
 </script>
-</body>
-</html>
