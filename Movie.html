@@ -1,0 +1,61 @@
+<div id="videoTool" style="max-width:900px;margin:20px auto;font-family:sans-serif;">
+  <input type="file" id="videoInput" accept="video/*" style="margin-bottom:12px;">
+
+  <video id="videoPlayer" controls style="width:100%;max-height:520px;background:#000;"></video>
+
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+    <button onclick="skipVideo(-10)">10秒戻し</button>
+    <button onclick="skipVideo(-5)">5秒戻し</button>
+    <button onclick="skipVideo(-3)">3秒戻し</button>
+
+    <button onclick="skipVideo(3)">3秒送り</button>
+    <button onclick="skipVideo(5)">5秒送り</button>
+    <button onclick="skipVideo(10)">10秒送り</button>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+    <button onclick="setSpeed(1)">1倍速</button>
+    <button onclick="setSpeed(1.2)">1.2倍速</button>
+    <button onclick="setSpeed(1.5)">1.5倍速</button>
+    <button onclick="setSpeed(2)">2倍速</button>
+    <button onclick="setSpeed(3)">3倍速</button>
+  </div>
+
+  <p id="speedText" style="margin-top:10px;">再生速度：1倍速</p>
+</div>
+
+<script>
+let currentVideoUrl = null;
+
+const input = document.getElementById('videoInput');
+const video = document.getElementById('videoPlayer');
+const speedText = document.getElementById('speedText');
+
+input.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // 前回の動画URLを破棄＝再アップロード時に古い参照を削除
+  if (currentVideoUrl) {
+    URL.revokeObjectURL(currentVideoUrl);
+    currentVideoUrl = null;
+  }
+
+  currentVideoUrl = URL.createObjectURL(file);
+  video.src = currentVideoUrl;
+  video.load();
+  video.playbackRate = 1;
+  speedText.textContent = '再生速度：1倍速';
+});
+
+function skipVideo(seconds) {
+  if (!video.src) return;
+  video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + seconds));
+}
+
+function setSpeed(rate) {
+  if (!video.src) return;
+  video.playbackRate = rate;
+  speedText.textContent = '再生速度：' + rate + '倍速';
+}
+</script>
