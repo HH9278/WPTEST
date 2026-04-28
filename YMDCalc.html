@@ -1,0 +1,53 @@
+<div id="dateCalcBox" style="max-width:520px;padding:16px;border:1px solid #ddd;border-radius:12px;">
+  <h3>◯年◯ヶ月後の日数・月数計算</h3>
+
+  <label>開始日</label><br>
+  <input type="date" id="startDate" style="width:100%;padding:8px;margin:6px 0 12px;">
+
+  <label>何年後</label><br>
+  <input type="number" id="yearsLater" min="0" value="1" style="width:100%;padding:8px;margin:6px 0 12px;">
+
+  <label>何ヶ月後</label><br>
+  <input type="number" id="monthsLater" min="0" value="0" style="width:100%;padding:8px;margin:6px 0 12px;">
+
+  <button onclick="calculateDays()" style="padding:10px 16px;border:none;border-radius:8px;cursor:pointer;">
+    計算する
+  </button>
+
+  <div id="result" style="margin-top:16px;font-weight:bold;line-height:1.8;"></div>
+</div>
+
+<script>
+function calculateDays() {
+  const startInput = document.getElementById("startDate").value;
+  const years = Number(document.getElementById("yearsLater").value);
+  const months = Number(document.getElementById("monthsLater").value);
+  const result = document.getElementById("result");
+
+  if (!startInput || isNaN(years) || isNaN(months)) {
+    result.innerHTML = "開始日・年数・月数を入力してください。";
+    return;
+  }
+
+  const startDate = new Date(startInput + "T00:00:00");
+  const endDate = new Date(startDate);
+
+  endDate.setFullYear(endDate.getFullYear() + years);
+  endDate.setMonth(endDate.getMonth() + months);
+
+  const diffMs = endDate - startDate;
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  const totalMonths = years * 12 + months;
+
+  const yyyy = endDate.getFullYear();
+  const mm = String(endDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(endDate.getDate()).padStart(2, "0");
+
+  result.innerHTML =
+    startInput + " から " + years + "年" + months + "ヶ月後は<br>" +
+    yyyy + "年" + mm + "月" + dd + "日です。<br>" +
+    "日数は " + diffDays + " 日です。<br>" +
+    "月数は " + totalMonths + " ヶ月です。";
+}
+</script>
