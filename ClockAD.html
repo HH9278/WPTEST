@@ -1,0 +1,224 @@
+<div id="stylishClockApp">
+  <div class="clock-card">
+    <div class="clock-header">
+      <div>
+        <div class="clock-label">Browser Clock</div>
+        <div class="clock-date" id="clockDate"></div>
+      </div>
+
+      <button id="clockToggleBtn" type="button">アナログ</button>
+    </div>
+
+    <div id="digitalClock" class="digital-clock"></div>
+
+    <div id="analogClock" class="analog-clock hidden">
+      <div class="clock-face">
+        <div class="hand hour-hand" id="hourHand"></div>
+        <div class="hand minute-hand" id="minuteHand"></div>
+        <div class="hand second-hand" id="secondHand"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+#stylishClockApp {
+  max-width: 420px;
+  margin: 24px auto;
+  font-family: "Segoe UI", sans-serif;
+}
+
+#stylishClockApp .clock-card {
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f7f7f7, #ffffff);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+  color: #222;
+}
+
+#stylishClockApp .clock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+#stylishClockApp .clock-label {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: #777;
+  text-transform: uppercase;
+}
+
+#stylishClockApp .clock-date {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
+#clockToggleBtn {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#clockToggleBtn:hover {
+  opacity: 0.85;
+}
+
+#stylishClockApp .digital-clock {
+  text-align: center;
+  font-size: 56px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  padding: 36px 0 28px;
+}
+
+#stylishClockApp .analog-clock {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 8px;
+}
+
+#stylishClockApp .clock-face {
+  position: relative;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #ffffff 0%, #f1f1f1 70%, #dedede 100%);
+  box-shadow:
+    inset 0 0 18px rgba(0,0,0,0.08),
+    0 12px 30px rgba(0,0,0,0.12);
+}
+
+#stylishClockApp .clock-face::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+#stylishClockApp .hand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform-origin: bottom center;
+  border-radius: 999px;
+}
+
+#stylishClockApp .hour-hand {
+  width: 6px;
+  height: 62px;
+  margin-left: -3px;
+  background: #222;
+}
+
+#stylishClockApp .minute-hand {
+  width: 4px;
+  height: 82px;
+  margin-left: -2px;
+  background: #333;
+}
+
+#stylishClockApp .second-hand {
+  width: 2px;
+  height: 92px;
+  margin-left: -1px;
+  background: #c44;
+}
+
+#stylishClockApp .center-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #222;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#stylishClockApp .hidden {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  #stylishClockApp .digital-clock {
+    font-size: 42px;
+  }
+
+  #stylishClockApp .clock-face {
+    width: 190px;
+    height: 190px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const digitalClock = document.getElementById("digitalClock");
+  const analogClock = document.getElementById("analogClock");
+  const toggleBtn = document.getElementById("clockToggleBtn");
+  const clockDate = document.getElementById("clockDate");
+
+  const hourHand = document.getElementById("hourHand");
+  const minuteHand = document.getElementById("minuteHand");
+  const secondHand = document.getElementById("secondHand");
+
+  let mode = "digital";
+
+  function pad(num) {
+    return String(num).padStart(2, "0");
+  }
+
+  function updateClock() {
+    const now = new Date();
+
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    digitalClock.textContent =
+      pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+
+    clockDate.textContent = now.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "short"
+    });
+
+    const secondDeg = seconds * 6;
+    const minuteDeg = minutes * 6 + seconds * 0.1;
+    const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+
+    secondHand.style.transform = "rotate(" + secondDeg + "deg)";
+    minuteHand.style.transform = "rotate(" + minuteDeg + "deg)";
+    hourHand.style.transform = "rotate(" + hourDeg + "deg)";
+  }
+
+  toggleBtn.addEventListener("click", function() {
+    if (mode === "digital") {
+      mode = "analog";
+      digitalClock.classList.add("hidden");
+      analogClock.classList.remove("hidden");
+      toggleBtn.textContent = "デジタル";
+    } else {
+      mode = "digital";
+      analogClock.classList.add("hidden");
+      digitalClock.classList.remove("hidden");
+      toggleBtn.textContent = "アナログ";
+    }
+  });
+
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>
