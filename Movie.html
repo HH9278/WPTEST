@@ -1,8 +1,27 @@
 <div id="videoTool" style="max-width:900px;margin:20px auto;font-family:sans-serif;">
-  <input type="file" id="videoInput" accept="video/*" style="margin-bottom:12px;">
 
-  <video id="videoPlayer" controls style="width:100%;max-height:520px;background:#000;"></video>
+  <!-- 動画選択 -->
+  <input type="file"
+         id="videoInput"
+         accept="video/*"
+         multiple
+         style="margin-bottom:12px;">
 
+  <!-- プレイリスト -->
+  <div style="margin-bottom:12px;">
+    <strong>再生リスト</strong>
+    <ul id="videoList"
+        style="list-style:none;padding:0;margin-top:8px;border:1px solid #ccc;border-radius:6px;max-height:220px;overflow:auto;">
+    </ul>
+  </div>
+
+  <!-- 動画 -->
+  <video id="videoPlayer"
+         controls
+         style="width:100%;max-height:520px;background:#000;">
+  </video>
+
+  <!-- シーク -->
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
     <button onclick="skipVideo(-10)">10秒戻し</button>
     <button onclick="skipVideo(-5)">5秒戻し</button>
@@ -13,49 +32,152 @@
     <button onclick="skipVideo(10)">10秒送り</button>
   </div>
 
+  <!-- 再生速度 -->
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+
+    <button onclick="setSpeed(0.25)">0.25倍速</button>
+    <button onclick="setSpeed(0.5)">0.5倍速</button>
+    <button onclick="setSpeed(0.75)">0.75倍速</button>
+
     <button onclick="setSpeed(1)">1倍速</button>
+
     <button onclick="setSpeed(1.2)">1.2倍速</button>
     <button onclick="setSpeed(1.5)">1.5倍速</button>
     <button onclick="setSpeed(2)">2倍速</button>
     <button onclick="setSpeed(3)">3倍速</button>
   </div>
 
-  <p id="speedText" style="margin-top:10px;">再生速度：1倍速</p>
+  <p id="speedText" style="margin-top:10px;">
+    再生速度：1倍速
+  </p>
+
 </div>
 
 <script>
-let currentVideoUrl = null;
+
+let videoListData = [];
+let currentIndex = 0;
 
 const input = document.getElementById('videoInput');
 const video = document.getElementById('videoPlayer');
 const speedText = document.getElementById('speedText');
+const videoList = document.getElementById('videoList');
 
+
+// 動画読み込み
 input.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
 
-  // 前回の動画URLを破棄＝再アップロード時に古い参照を削除
-  if (currentVideoUrl) {
-    URL.revokeObjectURL(currentVideoUrl);
-    currentVideoUrl = null;
-  }
+  // 古いURL解放
+  videoListData.forEach(item => {
+    URL.revokeObjectURL(item.url);
+  });
 
-  currentVideoUrl = URL.createObjectURL(file);
-  video.src = currentVideoUrl;
-  video.load();
-  video.playbackRate = 1;
-  speedText.textContent = '再生速度：1倍速';
+  videoListData = [];
+
+  const files = Array.from(e.target.files);
+
+  if (files.length === 0) return;
+
+  files.forEach(file => {
+
+    videoListData.push({
+      name: file.name,
+      url: URL.createObjectURL(file)
+    });
+
+  });
+
+  renderVideoList();
+
+  playVideo(0);
+
 });
 
-function skipVideo(seconds) {
-  if (!video.src) return;
-  video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + seconds));
+
+// リスト描画
+function renderVideoList() {
+
+  videoList.innerHTML = '';
+
+  videoListData.forEach((item, index) => {
+
+    const li = document.createElement('li');
+
+    li.textContent = item.name;
+
+    li.style.padding = '8px';
+    li.style.borderBottom = '1px solid #ddd';
+    li.style.cursor = 'pointer';
+
+    if (index === currentIndex) {
+      li.style.background = '#e8f0ff';
+      li.style.fontWeight = 'bold';
+    }
+
+    li.onclick = function() {
+      playVideo(index);
+    };
+
+    videoList.appendChild(li);
+
+  });
+
 }
 
-function setSpeed(rate) {
-  if (!video.src) return;
-  video.playbackRate = rate;
-  speedText.textContent = '再生速度：' + rate + '倍速';
+
+// 動画再生
+function playVideo(index) {
+
+  if (!videoListData[index]) return;
+
+  currentIndex = index;
+
+  video.src = videoListData[index].url;
+
+  video.load();
+
+  video.play();
+
+  renderVideoList();
+
 }
+
+
+// 次動画自動再生
+video.addEventListener('ended', function() {
+
+  const nextIndex = currentIndex + 1;
+
+  if (nextIndex < videoListData.length) {
+    playVideo(nextIndex);
+  }
+
+});
+
+
+// シーク
+function skipVideo(seconds) {
+
+  if (!video.src) return;
+
+  video.currentTime = Math.max(
+    0,
+    Math.min(video.duration || 0, video.currentTime + seconds)
+  );
+
+}
+
+
+// 再生速度
+function setSpeed(rate) {
+
+  if (!video.src) return;
+
+  video.playbackRate = rate;
+
+  speedText.textContent =
+    '再生速度：' + rate + '倍速';
+
+}
+
 </script>
